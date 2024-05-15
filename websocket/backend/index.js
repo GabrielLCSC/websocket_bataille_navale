@@ -41,7 +41,7 @@ io.on("connection", (socket) => {
       rooms[room] = rooms[room].filter((id) => id !== socket.id);
       if (rooms[room].length === 0) delete rooms[room];
     }
-
+    delete users[socket.id];
     io.to(room).emit("users", getUsersInRoom(room)); // Émet les utilisateurs de la room
   });
 
