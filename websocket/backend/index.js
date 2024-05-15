@@ -5,7 +5,7 @@ import { Server } from "socket.io";
 import cors from "cors";
 const app = express();
 const server = http.createServer(app);
-const PORT = 3000;
+const PORT = 3001;
 const io = new Server(server, {
   cors: {
     origin: "*",
