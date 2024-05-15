@@ -21,8 +21,12 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("Client disconnected");
+    Object.keys(rooms).forEach((room) => {
+      rooms[room] = rooms[room].filter((id) => id !== socket.id);
+      if (rooms[room].length === 0) delete rooms[room];
+      io.to(room).emit("users", getUsersInRoom(room));
+    });
     delete users[socket.id];
-    delete rooms[socket.id];
   });
 
   socket.on("join", (room) => {
