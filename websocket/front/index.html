@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <link href="./style.css" rel="stylesheet">
 </head>
@@ -47,31 +47,29 @@
     socket.on('connect', () => {
         console.log('Connected');
     });
-    socket.on('user connected', (userId) => {
-    document.querySelector('.data').innerText = 'A user has connected with ID: ' + userId;
+    socket.on("user connected", (userId) => {
+      document.querySelector(".data").innerText =
+        "A user has connected with ID: " + userId;
     });
 
-    socket.on('message', (data) => {
-        console.log(data);
-        document.querySelector('.data').innerText = data;
+    socket.on("message", (data) => {
+      console.log(data);
+      document.querySelector(".data").innerText = data;
     });
-    socket.on('disconnect', () => {
-        console.log('Disconnected');
+    socket.on("disconnect", () => {
+      console.log("Disconnected");
     });
 
     let send = () => {
-        i++;
-        console.log(text.value);
-        //socket.emit('message', `Message ${i}`);
-        socket.emit('room', text.value, `Message room ${i}`);
-    }
-    text.addEventListener('change', (e) => {
-        socket.emit('leave', room);
-        socket.emit('join', e.target.value);
-        room = e.target.value;
+      i++;
+      console.log(text.value);
+      //socket.emit('message', `Message ${i}`);
+      socket.emit("room", text.value, `Message room ${i}`);
+    };
+    text.addEventListener("change", (e) => {
+      socket.emit("leave", room);
+      socket.emit("join", e.target.value);
+      room = e.target.value;
     });
-
-
-
-</script>
+  </script>
 </html>
