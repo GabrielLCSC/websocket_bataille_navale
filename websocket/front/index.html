@@ -11,15 +11,17 @@
     <p class="data"></p>
     <textarea name="" id="" cols="30" rows="10"></textarea>
     <button onclick="send()">Refresh</button>
-    <button onclick="getUsers()">Get Users</button> <!-- Bouton pour obtenir les utilisateurs -->
+    <button onclick="getUsers()">Get Users</button>
+    <p id="error-message"></p>
 
     <div class="grid-container">
+        <p id="player-message"></p>
         <div>
-            <h1>Grille 1</h1>
+            <h1>Joueur 1</h1>
             <div class="grid" id="grid1"></div>
         </div>
         <div>
-            <h1>Grille 2</h1>
+            <h1>Joueur 2</h1>
             <div class="grid" id="grid2"></div>
         </div>
     </div>
@@ -47,6 +49,13 @@
       console.log(data);
       document.querySelector(".data").innerText = data;
     });
+
+    socket.on("error", (message) => {
+      console.log(message);
+      // Affiche le message d'erreur dans un élément HTML
+      document.querySelector("#error-message").innerText = message;
+    });
+    
     socket.on("disconnect", () => {
       console.log("Disconnected");
     });

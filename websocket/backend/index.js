@@ -31,11 +31,21 @@ io.on("connection", (socket) => {
 
   socket.on("join", (room) => {
     console.log(`join room: ${room}`);
+    if (rooms[room] && rooms[room].length >= 2) {
+        socket.emit("error", "La salle est pleine");
+        return;
+      }
     socket.join(room);
     if (rooms[room] === undefined) rooms[room] = [];
     rooms[room].push(socket.id);
     console.log(rooms[room][0]);
     io.to(room).emit("users", getUsersInRoom(room)); // Émet les utilisateurs de la room
+
+    if (rooms[room][0] === socket.id) {
+        socket.emit("message", "Vous êtes le joueur 1");
+      } else {
+        socket.emit("message", "Vous êtes le joueur 2");
+      }
   });
 
   socket.on("leave", (room) => {
