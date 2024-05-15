@@ -7,8 +7,8 @@
   display: grid;
   grid-template-columns: repeat(11, 1fr);
   grid-template-rows: repeat(11, 1fr);
-  width: 500px;
-  height: 500px;
+  width: 400px;
+  height: 400px;
   margin: 20px;
 }
 .grid div {
@@ -16,4 +16,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+h1{
+  text-align: center;
 }
