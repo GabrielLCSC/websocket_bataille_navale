@@ -6,7 +6,6 @@ import cors from "cors";
 const app = express();
 const server = http.createServer(app);
 const PORT = 3001;
-
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -18,8 +17,11 @@ app.get("/", (req, res) => {
 });
 
 io.on("connection", (socket) => {
-  console.log("a user connected");
-  socket.broadcast.emit("user connected");
+  let userId =
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15);
+  console.log("a user connected with ID: ", userId);
+  socket.broadcast.emit("user connected", userId);
   socket.on("disconnect", () => {
     console.log("user disconnected");
     socket.broadcast.emit("user disconnected");

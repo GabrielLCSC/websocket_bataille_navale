@@ -23,10 +23,15 @@
     let room = "";
     let socketid = "";
     const text = document.querySelector("textarea");
-    const socket = io(url);
+    const socket = io("http://192.168.94.97:3000/");
     socket.on("connect", () => {
       console.log("Connected");
     });
+    socket.on("user connected", (userId) => {
+      document.querySelector(".data").innerText =
+        "A user has connected with ID: " + userId;
+    });
+
     socket.on("message", (data) => {
       console.log(data);
       document.querySelector(".data").innerText = data;
