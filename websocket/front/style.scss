@@ -2,24 +2,18 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
 }
 .grid {
     display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    grid-template-rows: repeat(10, 1fr);
+    grid-template-columns: repeat(11, 1fr);
+    grid-template-rows: repeat(11, 1fr);
     width: 500px;
     height: 500px;
-    margin-top: 20px;
+    margin: 20px;
 }
 .grid div {
     border: 1px solid black;
     display: flex;
     justify-content: center;
     align-items: center;
-}
-.labels {
-    display: flex;
-    justify-content: space-between;
-    width: 500px;
 }

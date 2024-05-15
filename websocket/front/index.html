@@ -13,29 +13,11 @@
     <button onclick="send()">Refresh</button>
 
     <div class="grid-container">
-        <!-- Generate labels -->
-        <div class="labels">
-            <script>
-                for (let i = 1; i <= 10; i++) {
-                    document.write(`<div>${i}</div>`);
-                }
-            </script>
-        </div>
-        <!-- Generate grid cells -->
-        <div class="grid">
-            <script>
-                const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
-                const numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
-                for (let i = 0; i < 10; i++) {
-                    document.write(`<div style="writing-mode: vertical-rl; text-orientation: upright;">${letters[i]}</div>`);
-                    for (let j = 1; j < 10; j++) {
-                        
-                        document.write(`<div onclick="this.style.backgroundColor='blue'"></div>`);
-                    }
-                }
-            </script>
-        </div>
+        <div class="grid" id="grid1"></div>
+        <div class="grid" id="grid2"></div>
     </div>
+    <button id="sendButton">Send</button>
+    <script src="bataille.js"></script>
 </body>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
 <script>
