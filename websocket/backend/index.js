@@ -42,9 +42,9 @@ io.on("connection", (socket) => {
     io.to(room).emit("users", getUsersInRoom(room)); // Émet les utilisateurs de la room
 
     if (rooms[room][0] === socket.id) {
-        socket.emit("message", "Vous êtes le joueur 1");
+        socket.emit("quiEtesVous", "Vous êtes le joueur 1");
       } else {
-        socket.emit("message", "Vous êtes le joueur 2");
+        socket.emit("quiEtesVous", "Vous êtes le joueur 2");
       }
   });
 

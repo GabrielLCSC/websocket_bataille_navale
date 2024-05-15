@@ -15,7 +15,7 @@
     <p id="error-message"></p>
 
     <div class="grid-container">
-        <p id="player-message"></p>
+        <h1 id="player-message"></h1>
         <div>
             <h1>Joueur 1</h1>
             <div class="grid" id="grid1"></div>
@@ -49,6 +49,13 @@
       console.log(data);
       document.querySelector(".data").innerText = data;
     });
+
+    socket.on("quiEtesVous", (data) => {
+      console.log(data);
+      document.querySelector("#player-message").innerText = data;
+    });
+
+    
 
     socket.on("error", (message) => {
       console.log(message);
