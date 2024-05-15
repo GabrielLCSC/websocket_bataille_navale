@@ -22,8 +22,8 @@
     socket.on('connect', () => {
         console.log('Connected');
     });
-    socket.on('user connected', () => {
-    document.querySelector('.data').innerText = 'A user has connected';
+    socket.on('user connected', (userId) => {
+    document.querySelector('.data').innerText = 'A user has connected with ID: ' + userId;
     });
 
     socket.on('message', (data) => {
