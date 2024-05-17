@@ -70,3 +70,10 @@ function generateBoats(player) {
         }
     }
 }
+
+window.onload = function() {
+    generateGrid(1);
+    generateGrid(2);
+    generateBoats(1);
+    generateBoats(2);
+}

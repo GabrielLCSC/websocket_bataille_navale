@@ -29,13 +29,12 @@ io.on("connection", (socket) => {
     delete users[socket.id];
   });
 
-// ...
-socket.on("join", (room) => {
+  socket.on("join", (room) => {
     console.log(`join room: ${room}`);
     if (rooms[room] && rooms[room].length >= 2) {
         socket.emit("error", "La salle est pleine");
         return;
-    }
+      }
     socket.join(room);
     if (rooms[room] === undefined) rooms[room] = [];
     rooms[room].push(socket.id);
@@ -44,12 +43,10 @@ socket.on("join", (room) => {
 
     if (rooms[room][0] === socket.id) {
         socket.emit("quiEtesVous", "Vous êtes le joueur 1");
-        socket.emit("playerEntersRoom", 1); // Emit an event to the client when the player joins the room
-    } else {
-        socket.emit("playerEntersRoom", 2); // Emit an event to the client when the player joins the room
-    }
-});
-// ...
+      } else {
+        socket.emit("quiEtesVous", "Vous êtes le joueur 2");
+      }
+  });
 
   socket.on("leave", (room) => {
     console.log(`leave room: ${room}`);
