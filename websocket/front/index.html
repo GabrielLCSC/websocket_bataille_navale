@@ -14,8 +14,9 @@
     <button onclick="getUsers()">Get Users</button>
     <p id="error-message"></p>
 
+    <h1 id="player-message"></h1>
+
     <div class="grid-container">
-        <h1 id="player-message"></h1>
         <div>
             <h1>Joueur 1</h1>
             <div class="grid" id="grid1"></div>
@@ -50,9 +51,11 @@
       document.querySelector(".data").innerText = data;
     });
 
+    
     socket.on("quiEtesVous", (data) => {
       console.log(data);
       document.querySelector("#player-message").innerText = data;
+
     });
 
     
@@ -66,6 +69,8 @@
     socket.on("disconnect", () => {
       console.log("Disconnected");
     });
+
+    
 
     // Écoute de l'événement 'users'
     socket.on("users", (users) => {

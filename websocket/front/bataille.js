@@ -25,7 +25,48 @@ function checkCell(cell, player) {
     }
 }
 
-window.onload = function() {
-    generateGrid(1);
-    generateGrid(2);
+function generateBoats(player) {
+    const boatSizes = [2, 3, 4]; // Sizes of the boats
+    for (let size of boatSizes) {
+        let placed = false;
+        while (!placed) {
+            let direction = Math.random() < 0.5 ? 'horizontal' : 'vertical'; // Random direction
+            let startRow, startCol;
+            if (direction === 'horizontal') {
+                startRow = Math.floor(Math.random() * 10); // Random row
+                startCol = Math.floor(Math.random() * (10 - size + 1)); // Random column, making sure the boat fits in the grid
+            } else {
+                startRow = Math.floor(Math.random() * (10 - size + 1)); // Random row, making sure the boat fits in the grid
+                startCol = Math.floor(Math.random() * 10); // Random column
+            }
+            // Check if the cells are free
+            let free = true;
+            for (let i = 0; i < size; i++) {
+                let cell;
+                if (direction === 'horizontal') {
+                    cell = document.getElementById(`p${player}${letters[startRow]}${numbers[startCol + i]}`);
+                } else {
+                    cell = document.getElementById(`p${player}${letters[startRow + i]}${numbers[startCol]}`);
+                }
+                if (cell.style.backgroundColor === 'blue') {
+                    free = false;
+                    break;
+                }
+            }
+            // If the cells are free, place the boat
+            if (free) {
+                for (let i = 0; i < size; i++) {
+                    let cell;
+                    if (direction === 'horizontal') {
+                        cell = document.getElementById(`p${player}${letters[startRow]}${numbers[startCol + i]}`);
+                    } else {
+                        cell = document.getElementById(`p${player}${letters[startRow + i]}${numbers[startCol]}`);
+                    }
+                    cell.style.backgroundColor = 'blue';
+                    bateaux[player]++;
+                }
+                placed = true;
+            }
+        }
+    }
 }
