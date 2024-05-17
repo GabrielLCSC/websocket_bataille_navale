@@ -4,12 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <link href="./style.css" rel="stylesheet">
-</head>
-<body>
+    <link href="./style.css" rel="stylesheet" />
+  </head>
+  <body>
     <p>last message</p>
     <p class="data"></p>
-    <textarea name="" id="" cols="30" rows="10"></textarea>
+    <label for="letters">Choisissez une room :</label>
+    <select id="letters" name="letters">
+      <option value="a">a</option>
+      <option value="b">b</option>
+      <option value="c">c</option>
+      <option value="d">d</option>
+      <option value="e">e</option>
+      <option value="f">f</option>
+      <option value="g">g</option>
+      <option value="h">h</option>
+      <option value="i">i</option>
+    </select>
+    <!-- <textarea name="" id="" cols="30" rows="10"></textarea> -->
     <button onclick="send()">Refresh</button>
     <button onclick="getUsers()">Get Users</button>
     <p id="error-message"></p>
@@ -17,29 +29,33 @@
     <h1 id="player-message"></h1>
 
     <div class="grid-container">
-        <div>
-            <h1>Joueur 1</h1>
-            <div class="grid" id="grid1"></div>
-        </div>
-        <div>
-            <h1>Joueur 2</h1>
-            <div class="grid" id="grid2"></div>
-        </div>
+      <div>
+        <h1>Joueur 1</h1>
+        <div class="grid" id="grid1"></div>
+      </div>
+      <div>
+        <h1>Joueur 2</h1>
+        <div class="grid" id="grid2"></div>
+      </div>
     </div>
     <button id="sendButton">Send</button>
     <script src="bataille.js"></script>
-</body>
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
-<script>
-    let url = 'https://websocket-bataille-navale.onrender.com/';
+  </body>
+  <script
+    src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+    integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+    crossorigin="anonymous"
+  ></script>
+  <script>
+    let url = "https://websocket-bataille-navale.onrender.com/";
     // let url = 'http://localhost:5000';
     let i = 0;
-    let room = '';
-    let socketid = '';
-    const text = document.querySelector('textarea');
+    let room = "";
+    let socketid = "";
+    const text = document.querySelector("select");
     const socket = io(url);
-    socket.on('connect', () => {
-        console.log('Connected');
+    socket.on("connect", () => {
+      console.log("Connected");
     });
     socket.on("user connected", (userId) => {
       document.querySelector(".data").innerText =
@@ -51,26 +67,20 @@
       document.querySelector(".data").innerText = data;
     });
 
-    
     socket.on("quiEtesVous", (data) => {
       console.log(data);
       document.querySelector("#player-message").innerText = data;
-
     });
-
-    
 
     socket.on("error", (message) => {
       console.log(message);
       // Affiche le message d'erreur dans un élément HTML
       document.querySelector("#error-message").innerText = message;
     });
-    
+
     socket.on("disconnect", () => {
       console.log("Disconnected");
     });
-
-    
 
     // Écoute de l'événement 'users'
     socket.on("users", (users) => {
