@@ -30,28 +30,37 @@ io.on("connection", (socket) => {
   });
 
   socket.on("join", (room) => {
-    console.log(`join room: ${room}`);
+    console.log(`join room:  ${room}`);
     if (rooms[room] && rooms[room].length >= 2) {
-        socket.emit("error", "La salle est pleine");
-        return;
-      }
+      socket.emit("error", "La salle est pleine");
+      return;
+    }
     socket.join(room);
-    if (rooms[room] === undefined) rooms[room] = [];
+    socket.emit("join", room);
+    if (!rooms[room]) rooms[room] = [];
     rooms[room].push(socket.id);
-    console.log(rooms[room][0]);
     io.to(room).emit("users", getUsersInRoom(room)); // Émet les utilisateurs de la room
 
+    // if (rooms[room].length === 1) {
+    //   // If this is the first player in the room, emit 'generateBoats' event
+    //   io.to(room).emit("generateBoats");
+    // }
+
     if (rooms[room][0] === socket.id) {
-        socket.emit("quiEtesVous", "Vous êtes le joueur 1");
-      } else {
-        socket.emit("quiEtesVous", "Vous êtes le joueur 2");
-      }
+      socket.emit("quiEtesVous", "Vous êtes le joueur 1");
+      //   generateGrid(1);
+      //   generateBoats(1);
+    } else {
+      socket.emit("quiEtesVous", "Vous êtes le joueur 2");
+      //   generateGrid(2);
+      //   generateBoats(2);
+    }
   });
 
   socket.on("leave", (room) => {
     console.log(`leave room: ${room}`);
     socket.leave(room);
-    if (rooms[room] !== undefined) {
+    if (rooms[room]) {
       rooms[room] = rooms[room].filter((id) => id !== socket.id);
       if (rooms[room].length === 0) delete rooms[room];
     }
@@ -66,9 +75,7 @@ io.on("connection", (socket) => {
 });
 
 function getUsersInRoom(room) {
-  return Object.keys(rooms)
-    .filter((socketId) => rooms[socketId] === room)
-    .map((socketId) => users[socketId]);
+  return rooms[room] || [];
 }
 
 server.listen(PORT, () => {

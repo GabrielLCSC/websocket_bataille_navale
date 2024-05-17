@@ -11,6 +11,7 @@
     <p class="data"></p>
     <label for="letters">Choisissez une room :</label>
     <select id="letters" name="letters">
+      <option selected>--Choisir une room--</option>
       <option value="a">a</option>
       <option value="b">b</option>
       <option value="c">c</option>
@@ -21,7 +22,6 @@
       <option value="h">h</option>
       <option value="i">i</option>
     </select>
-    <!-- <textarea name="" id="" cols="30" rows="10"></textarea> -->
     <button onclick="send()">Refresh</button>
     <button onclick="getUsers()">Get Users</button>
     <p id="error-message"></p>
@@ -47,10 +47,10 @@
     crossorigin="anonymous"
   ></script>
   <script>
-    let url = "https://websocket-bataille-navale.onrender.com/";
-    // let url = 'http://localhost:5000';
+    let url = 'http://localhost:5000';
     let i = 0;
     let room = "";
+    let nbJoueur = 1;
     let socketid = "";
     const text = document.querySelector("select");
     const socket = io(url);
@@ -74,9 +74,24 @@
 
     socket.on("error", (message) => {
       console.log(message);
-      // Affiche le message d'erreur dans un élément HTML
       document.querySelector("#error-message").innerText = message;
     });
+
+  socket.on("join", async (room) => {
+  console.log("Joined room: " + room);
+  socket.on("users", (users) => {
+      console.log(JSON.stringify(users));
+      if (users.length === 1){
+    generateGrid(1);
+  } else {
+    generateGrid(1);
+    generateBoats(1);
+    generateGrid(2);
+    generateBoats(2);
+  }
+  });
+
+});
 
     socket.on("disconnect", () => {
       console.log("Disconnected");
@@ -85,9 +100,18 @@
     // Écoute de l'événement 'users'
     socket.on("users", (users) => {
       console.log(JSON.stringify(users));
-      // Affiche les utilisateurs dans un élément HTML
       document.querySelector(".data").innerText = JSON.stringify(users);
+      nbJoueur = 2;
     });
+
+    // Écoute de l'événement 'generateBoats'
+    // socket.on("generateBoats", () => {
+    //   console.log("Generating boats...");
+    //   generateBoats(1);
+    //   generateBoats(2);
+    // });
+    
+
 
     let send = () => {
       i++;
@@ -98,11 +122,13 @@
       socket.emit("leave", room);
       socket.emit("join", e.target.value);
       room = e.target.value;
+
+      
     });
 
-    // Fonction pour obtenir les utilisateurs de la room actuelle
     const getUsers = () => {
       socket.emit("getUsers", room);
     };
+
   </script>
-</html>
+</html> 
