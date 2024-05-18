@@ -26,8 +26,13 @@ io.on("connection", (socket) => {
       rooms[room] = rooms[room].filter((id) => id !== socket.id);
       if (rooms[room].length === 0) delete rooms[room];
       io.to(room).emit("users", getUsersInRoom(room));
+      io.to(room).emit("roomUpdated", rooms[room]); // Emit roomUpdated event
     });
     delete users[socket.id];
+  });
+
+  socket.on("gameWon", (room) => {
+    io.to(room).emit("reload");
   });
 
   socket.on("join", (room) => {
@@ -44,20 +49,12 @@ io.on("connection", (socket) => {
     }
     rooms[room].push(socket.id);
     io.to(room).emit("users", getUsersInRoom(room)); // Émet les utilisateurs de la room
-
-    // if (rooms[room].length === 1) {
-    //   // If this is the first player in the room, emit 'generateBoats' event
-    //   io.to(room).emit("generateBoats");
-    // }
+    io.to(room).emit("roomUpdated", rooms[room]); // Emit roomUpdated event
 
     if (rooms[room][0] === socket.id) {
       socket.emit("quiEtesVous", "Vous êtes le joueur 1");
-      //   generateGrid(1);
-      //   generateBoats(1);
     } else {
       socket.emit("quiEtesVous", "Vous êtes le joueur 2");
-      //   generateGrid(2);
-      //   generateBoats(2);
     }
   });
 
@@ -66,6 +63,17 @@ io.on("connection", (socket) => {
     games[room].push(data);
     if (games[room].length === 2) {
       io.to(room).emit("startGame", games[room]);
+    }
+  });
+
+  socket.on("cellClicked", (room, data) => {
+    const game = games[room];
+    const player = game.find((game) => game.player !== data.player);
+    const cell = data.cell.split("-");
+    if (player.tab[cell[0]][cell[1]] === 1) {
+      socket.emit("cellClicked", "touché", data.cell);
+    } else {
+      socket.emit("cellClicked", "raté", data.cell);
     }
   });
 
@@ -90,9 +98,12 @@ io.on("connection", (socket) => {
     }
     delete users[socket.id];
     io.to(room).emit("users", getUsersInRoom(room)); // Émet les utilisateurs de la room
+    io.to(room).emit("roomUpdated", rooms[room]); // Emit roomUpdated event
+
+    // Emit clearGrids event
+    socket.emit("clearGrids");
   });
 
-  // Nouvel événement pour obtenir tous les utilisateurs connectés à une room spécifique
   socket.on("getUsers", (room) => {
     socket.emit("users", { users: rooms[room] }); // Émet les utilisateurs de la room
   });

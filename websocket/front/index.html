@@ -41,7 +41,7 @@
       </div>
     </div>
     <div style="display: flex; justify-content: center;">
-      <button id="sendButton" style="width: fit-content; margin: auto;">Valider la disposition des bateaux</button>
+      <button id="reload" style="width: fit-content; margin: auto; visibility: hidden;">Relancer une partie</button>
     </div>
 
     
@@ -58,6 +58,7 @@
     let i = 0;
     let room = "";
     let nbJoueur = 1;
+    nbCellClicked = 0;
     let socketid = "";
     const text = document.querySelector("select");
     const socket = io(url);
@@ -72,6 +73,10 @@
     socket.on("message", (data) => {
       console.log(data);
       document.querySelector(".data").innerText = data;
+    });
+
+    socket.on("reload", () => {
+      location.reload();
     });
 
     socket.on("quiEtesVous", (data) => {
@@ -92,38 +97,65 @@
       socket.emit('getMyGrid', room, joueur);
     });
 
-    socket.on('myGrid', (grid) => {
-      console.log('getMyGrid');
-      console.log(grid);
+    socket.on("cellClicked", (message, cell) => {
+  console.log(message, cell);
+  
+  let cellElement = document.getElementById(cell);
+  
+  // Check if cell has already been clicked
+  if (cellElement.style.pointerEvents === 'none') {
+    return;
+  }
 
-      if(joueur===1){
+  document.querySelector("#player-message").innerText = message;
+  if(message === 'touché'){
+    cellElement.style.backgroundColor = 'red';
+    nbCellClicked++;
+    if(nbCellClicked === 9){
+      document.querySelector("#player-message").innerText = 'Bravo vous avez gagné !';
+      document.querySelector("#reload").style.visibility = 'visible';
+    }
+  }else{
+    cellElement.style.backgroundColor = 'blue';
+  }
+  
+  // Disable further clicks on this cell
+  cellElement.style.pointerEvents = 'none';
 
-        for(let i=0; i<10; i++){
-          for(let j=0; j<10; j++){
-            if(grid[i][j] === 1){
-              document.getElementById('grid1').innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: blue;"></div>`;  
-            }else{
-              document.getElementById('grid1').innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: white;"></div>`;
-            }
-          }
-        }
+  // Emit room update event to server
+  socket.emit("updateRoom", room);
+});
 
-        generateGrid(2);
+socket.on('myGrid', (grid) => {
+  console.log('getMyGrid');
+  console.log(grid);
 
-      }else{
-        generateGrid(1);  
-
-        for(let i=0; i<10; i++){
-          for(let j=0; j<10; j++){
-            if(grid[i][j] === 1){
-              document.getElementById('grid2').innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: red;"></div>`;  
-            }else{
-              document.getElementById('grid2').innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: white;"></div>`;
-            }
-          }
+  if(joueur===1){
+    for(let i=0; i<10; i++){
+      for(let j=0; j<10; j++){
+        if(grid[i][j] === 1){
+          document.getElementById('grid1').innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: gray;"></div>`;  
+        }else{
+          document.getElementById('grid1').innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: white;"></div>`;
         }
       }
-    });
+    }
+    generateGrid(2);
+  }else{
+    generateGrid(1);  
+    for(let i=0; i<10; i++){
+      for(let j=0; j<10; j++){
+        if(grid[i][j] === 1){
+          document.getElementById('grid2').innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: gray;"></div>`;  
+        }else{
+          document.getElementById('grid2').innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: white;"></div>`;
+        }
+      }
+    }
+  }
+  // Emit room update event to server
+  socket.emit("updateRoom", room);
+});
       
     socket.on("error", (message) => {
       console.log(message);
@@ -131,13 +163,13 @@
     });
 
     socket.on("join", async (room) => {
-    console.log("Joined room: " + room);
-    socket.on("users", (users) => {
-      console.log(JSON.stringify(users));
+      console.log("Joined room: " + room);
+      socket.on("users", (users) => {
+        console.log(JSON.stringify(users));
 
-  });
+    });
 
-});
+    });
 
     socket.on("disconnect", () => {
       console.log("Disconnected");
@@ -150,6 +182,11 @@
       nbJoueur = 2;
     });
 
+    socket.on("clearGrids",(grid) => {
+      document.getElementById('grid1').innerHTML = '';
+      document.getElementById('grid2').innerHTML = '';
+    });
+
     // Écoute de l'événement 'generateBoats'
     // socket.on("generateBoats", () => {
     //   console.log("Generating boats...");
@@ -157,7 +194,6 @@
     //   generateBoats(2);
     // });
     
-
 
     let send = () => {
       i++;
@@ -176,5 +212,9 @@
       socket.emit("getUsers", room);
     };
 
+    document.getElementById('reload').addEventListener('click', () => {
+      socket.emit("gameWon", room); // Emit gameWon event to server
+    });
+
   </script>
-</html> 
+</html>
