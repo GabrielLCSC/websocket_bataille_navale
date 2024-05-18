@@ -3,45 +3,178 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pierre Feuille Ciseau</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        text-align: center;
-      }
-      #game {
-        display: none;
-      }
-      .choice {
-        cursor: pointer;
-        font-size: 20px;
-        margin: 10px;
-      }
-    </style>
+    <title>Document</title>
+    <link href="./style.css" rel="stylesheet" />
   </head>
   <body>
-    <h1>Pierre Feuille Ciseau</h1>
-    <div id="join">
-      <input type="text" id="name" placeholder="Enter your name" />
-      <button id="joinButton">Join Game</button>
+    <p>last message</p>
+    <p class="data"></p>
+    <label for="letters">Choisissez une room :</label>
+    <select id="letters" name="letters">
+      <option selected>--Choisir une room--</option>
+      <option value="a">a</option>
+      <option value="b">b</option>
+      <option value="c">c</option>
+      <option value="d">d</option>
+      <option value="e">e</option>
+      <option value="f">f</option>
+      <option value="g">g</option>
+      <option value="h">h</option>
+      <option value="i">i</option>
+    </select>
+    <button onclick="send()">Refresh</button>
+    <button onclick="getUsers()">Get Users</button>
+    <p id="error-message"></p>
+
+    <h1 id="player-message"></h1>
+
+    <div style="display: flex; justify-content:space-around;">
+      <h1>Joueur 1</h1>
+      <h1>Joueur 2</h1>
     </div>
-    <div id="game">
-      <h2>Welcome, <span id="playerName"></span>!</h2>
+    <div class="grid-container">
       <div>
-        <span class="choice" data-choice="rock">🪨 Rock</span>
-        <span class="choice" data-choice="paper">📜 Paper</span>
-        <span class="choice" data-choice="scissors">✂️ Scissors</span>
+        <div class="grid" id="grid1"></div>
       </div>
-      <h3>Players:</h3>
-      <ul id="players"></ul>
-      <h3 id="result"></h3>
+      <div>
+        <div class="grid" id="grid2"></div>
+      </div>
     </div>
-    <script
-      src="https://cdn.socket.io/4.7.5/socket.io.min.js"
-      integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
-      crossorigin="anonymous"
-    ></script>
-    <!-- Include Socket.IO client script -->
-    <script src="script.js"></script>
+    <div style="display: flex; justify-content: center;">
+      <button id="sendButton" style="width: fit-content; margin: auto;">Valider la disposition des bateaux</button>
+    </div>
+
+    
+    
   </body>
-</html>
+  <script
+    src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+    integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+    crossorigin="anonymous"
+  ></script>
+  <script src="bataille.js"></script>
+  <script>
+    let url = 'http://localhost:5000';
+    let i = 0;
+    let room = "";
+    let nbJoueur = 1;
+    let socketid = "";
+    const text = document.querySelector("select");
+    const socket = io(url);
+    socket.on("connect", () => {
+      console.log("Connected");
+    });
+    socket.on("user connected", (userId) => {
+      document.querySelector(".data").innerText =
+        "A user has connected with ID: " + userId;
+    });
+
+    socket.on("message", (data) => {
+      console.log(data);
+      document.querySelector(".data").innerText = data;
+    });
+
+    socket.on("quiEtesVous", (data) => {
+      console.log(data);
+      document.querySelector("#player-message").innerText = data;
+      if (data === "Vous êtes le joueur 1") {
+        joueur = 1;
+      }
+      else joueur = 2
+      console.log("joueur : " + joueur);
+      console.log("placage ds bat");
+      generateBoats(joueur);
+    });
+
+    socket.on('startGame', () => {
+      console.log('Game started');
+      document.querySelector("#player-message").innerText = 'Game started';
+      socket.emit('getMyGrid', room, joueur);
+    });
+
+    socket.on('myGrid', (grid) => {
+      console.log('getMyGrid');
+      console.log(grid);
+
+      if(joueur===1){
+
+        for(let i=0; i<10; i++){
+          for(let j=0; j<10; j++){
+            if(grid[i][j] === 1){
+              document.getElementById('grid1').innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: blue;"></div>`;  
+            }else{
+              document.getElementById('grid1').innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: white;"></div>`;
+            }
+          }
+        }
+
+        generateGrid(2);
+
+      }else{
+        generateGrid(1);  
+
+        for(let i=0; i<10; i++){
+          for(let j=0; j<10; j++){
+            if(grid[i][j] === 1){
+              document.getElementById('grid2').innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: red;"></div>`;  
+            }else{
+              document.getElementById('grid2').innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: white;"></div>`;
+            }
+          }
+        }
+      }
+    });
+      
+    socket.on("error", (message) => {
+      console.log(message);
+      document.querySelector("#error-message").innerText = message;
+    });
+
+    socket.on("join", async (room) => {
+    console.log("Joined room: " + room);
+    socket.on("users", (users) => {
+      console.log(JSON.stringify(users));
+
+  });
+
+});
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected");
+    });
+
+    // Écoute de l'événement 'users'
+    socket.on("users", (users) => {
+      console.log(JSON.stringify(users));
+      document.querySelector(".data").innerText = JSON.stringify(users);
+      nbJoueur = 2;
+    });
+
+    // Écoute de l'événement 'generateBoats'
+    // socket.on("generateBoats", () => {
+    //   console.log("Generating boats...");
+    //   generateBoats(1);
+    //   generateBoats(2);
+    // });
+    
+
+
+    let send = () => {
+      i++;
+      console.log(text.value);
+      socket.emit("room", text.value, `Message room ${i}`);
+    };
+    text.addEventListener("change", (e) => {
+      socket.emit("leave", room);
+      socket.emit("join", e.target.value);
+      room = e.target.value;
+
+      
+    });
+
+    const getUsers = () => {
+      socket.emit("getUsers", room);
+    };
+
+  </script>
+</html> 

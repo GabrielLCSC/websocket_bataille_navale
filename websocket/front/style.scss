@@ -1,16 +1,10 @@
 .grid-container {
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
+
 }
-.grid {
-    display: grid;
-    grid-template-columns: repeat(11, 1fr);
-    grid-template-rows: repeat(11, 1fr);
-    width: 500px;
-    height: 500px;
-    margin: 20px;
-}
+
 .grid div {
     border: 1px solid black;
     display: flex;
@@ -25,3 +19,14 @@
 h1{
     text-align: center;
 }
+.grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+  }
+  
+  .cell {
+    border: 1px solid black;
+    width: 20px;
+    height: 20px;
+  }
