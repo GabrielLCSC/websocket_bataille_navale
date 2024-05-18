@@ -43,11 +43,6 @@ function checkCell(cell, player) {
     player: joueur,
     cell: cell.id,
   });
-
-  if (cell.style.backgroundColor !== "blue" && bateaux[player] < 9) {
-    cell.style.backgroundColor = "blue";
-    bateaux[player]++;
-  }
 }
 
 function generateBoats(player) {

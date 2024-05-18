@@ -71,9 +71,9 @@ io.on("connection", (socket) => {
     const player = game.find((game) => game.player !== data.player);
     const cell = data.cell.split("-");
     if (player.tab[cell[0]][cell[1]] === 1) {
-      socket.emit("cellClicked", "touché", data.cell);
+      io.to(room).emit("cellClicked", "touché", data.cell); // Emit to all clients in the room
     } else {
-      socket.emit("cellClicked", "raté", data.cell);
+      io.to(room).emit("cellClicked", "raté", data.cell); // Emit to all clients in the room
     }
   });
 
