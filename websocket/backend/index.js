@@ -3,7 +3,7 @@ const http = require("http");
 const socketIo = require("socket.io");
 const ip = require("ip");
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 const app = express();
 const server = http.createServer(app);
@@ -16,6 +16,7 @@ const io = socketIo(server, {
 let users = {};
 let rooms = {};
 let games = {};
+let hits = {};
 
 io.on("connection", (socket) => {
   console.log("New client connected");
@@ -46,6 +47,7 @@ io.on("connection", (socket) => {
     if (!rooms[room]) {
       rooms[room] = [];
       games[room] = {};
+      hits[room] = { 1: 0, 2: 0 };
     }
     rooms[room].push(socket.id);
     io.to(room).emit("users", getUsersInRoom(room));
@@ -72,11 +74,20 @@ io.on("connection", (socket) => {
       const opponent = data.player === 1 ? 2 : 1;
       const player = game[opponent];
       const cell = data.cell.split("-");
+      let result = "raté";
       if (player && player[cell[1]][cell[2]] === 1) {
-        io.to(room).emit("cellClicked", "touché", data.cell);
-      } else {
-        io.to(room).emit("cellClicked", "raté", data.cell);
+        result = "touché";
+        hits[room][data.player]++;
+        if (hits[room][data.player] === 9) {
+          io.to(room).emit("gameWon", data.player);
+          io.to(room).emit("gameLost", opponent);
+        }
       }
+      io.to(room).emit("cellClicked", {
+        result,
+        cell: data.cell,
+        player: data.player,
+      });
     }
   });
 
@@ -96,6 +107,7 @@ io.on("connection", (socket) => {
       rooms[room] = rooms[room].filter((id) => id !== socket.id);
       if (rooms[room].length === 0) {
         delete games[room];
+        delete hits[room];
         delete rooms[room];
       }
     }

@@ -56,11 +56,11 @@
   ></script>
   <script src="bataille.js"></script>
   <script>
-    let url = "http://localhost:5000";
+    let url = "http://localhost:5001";
     let i = 0;
     let room = "";
     let nbJoueur = 1;
-    nbCellClicked = 0;
+    let nbCellClicked = 0;
     let socketid = "";
     const text = document.querySelector("select");
     const socket = io(url);
@@ -98,43 +98,41 @@
       socket.emit("getMyGrid", room, joueur);
     });
 
-    socket.on("cellClicked", (message, cell) => {
-    console.log(message, cell);
+    socket.on("cellClicked", (data) => {
+      const { result, cell, player } = data;
+      console.log(result, cell, player);
 
-    // Assurez-vous que l'ID de la cellule est correct pour les deux joueurs
-    const cellElement = document.getElementById(cell) || document.getElementById("p" + (joueur === 1 ? 2 : 1) + "-" + cell.split('-')[1] + "-" + cell.split('-')[2]);
+      // Assurez-vous que l'ID de la cellule est correct pour les deux joueurs
+      const cellElement =
+        document.getElementById(cell) ||
+        document.getElementById(
+          cell.replace(`p${player}`, `p${player === 1 ? 2 : 1}`)
+        );
 
-    // Vérifiez si l'élément cellElement n'est pas nul
-    if (cellElement) {
-      // Vérifiez si la cellule a déjà été cliquée
+      if (!cellElement) {
+        console.log(`Aucun élément trouvé avec l'ID : ${cell}`);
+        return;
+      }
+
       if (cellElement.style.pointerEvents === "none") {
         return;
       }
-    } else {
-      console.log(`Aucun élément trouvé avec l'ID : ${cell}`);
-      return;
-    }
 
-    document.querySelector("#player-message").innerText = message;
-    if (message === "touché") {
-      cellElement.style.backgroundColor = "red";
-      nbCellClicked++;
-      if (nbCellClicked === 9) {
-        document.querySelector("#player-message").innerText =
-          "Bravo vous avez gagné !";
-        document.querySelector("#reload").style.visibility = "visible";
+      document.querySelector("#player-message").innerText = result;
+      if (result === "touché") {
+        cellElement.style.backgroundColor = "red";
+        nbCellClicked++;
+        if (nbCellClicked === 9) {
+          document.querySelector("#player-message").innerText =
+            "Bravo vous avez gagné !";
+          document.querySelector("#reload").style.visibility = "visible";
+        }
+      } else {
+        cellElement.style.backgroundColor = "blue";
       }
-    } else {
-      cellElement.style.backgroundColor = "blue";
-    }
 
-    // Désactive les clics supplémentaires sur cette cellule
-    cellElement.style.pointerEvents = "none";
-
-    // Émet l'événement de mise à jour de la salle au serveur
-    socket.emit("updateRoom", room);
-  });
-
+      cellElement.style.pointerEvents = "none";
+    });
 
     socket.on("myGrid", (grid) => {
       console.log("getMyGrid");
@@ -146,11 +144,11 @@
             if (grid[i][j] === 1) {
               document.getElementById(
                 "grid1"
-              ).innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: gray;"></div>`;
+              ).innerHTML += `<div class="cell" id="p1-${i}-${j}" style="background-color: gray;"></div>`;
             } else {
               document.getElementById(
                 "grid1"
-              ).innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: white;"></div>`;
+              ).innerHTML += `<div class="cell" id="p1-${i}-${j}" style="background-color: white;"></div>`;
             }
           }
         }
@@ -162,16 +160,15 @@
             if (grid[i][j] === 1) {
               document.getElementById(
                 "grid2"
-              ).innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: gray;"></div>`;
+              ).innerHTML += `<div class="cell" id="p2-${i}-${j}" style="background-color: gray;"></div>`;
             } else {
               document.getElementById(
                 "grid2"
-              ).innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: white;"></div>`;
+              ).innerHTML += `<div class="cell" id="p2-${i}-${j}" style="background-color: white;"></div>`;
             }
           }
         }
       }
-      // Emit room update event to server
       socket.emit("updateRoom", room);
     });
 
@@ -191,7 +188,6 @@
       console.log("Disconnected");
     });
 
-    // Écoute de l'événement 'users'
     socket.on("users", (users) => {
       console.log(JSON.stringify(users));
       document.querySelector(".data").innerText = JSON.stringify(users);
@@ -203,18 +199,26 @@
       document.getElementById("grid2").innerHTML = "";
     });
 
-    // Écoute de l'événement 'generateBoats'
-    // socket.on("generateBoats", () => {
-    //   console.log("Generating boats...");
-    //   generateBoats(1);
-    //   generateBoats(2);
-    // });
+    socket.on("gameWon", (winner) => {
+      if (winner === joueur) {
+        document.querySelector("#player-message").innerText =
+          "Bravo vous avez gagné !";
+      }
+    });
+
+    socket.on("gameLost", (loser) => {
+      if (loser === joueur) {
+        document.querySelector("#player-message").innerText =
+          "Vous avez perdu.";
+      }
+    });
 
     let send = () => {
       i++;
       console.log(text.value);
       socket.emit("room", text.value, `Message room ${i}`);
     };
+
     text.addEventListener("change", (e) => {
       socket.emit("leave", room);
       socket.emit("join", e.target.value);
