@@ -101,11 +101,16 @@
   console.log(message, cell);
   
   let cellElement = document.getElementById(cell);
-  
+
+// Check if cellElement is not null
+if (cellElement) {
   // Check if cell has already been clicked
   if (cellElement.style.pointerEvents === 'none') {
     return;
   }
+} else {
+  console.log(`No element found with id: ${cell}`);
+}
 
   document.querySelector("#player-message").innerText = message;
   if(message === 'touché'){
