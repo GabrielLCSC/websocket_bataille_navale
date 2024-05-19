@@ -56,7 +56,7 @@
   ></script>
   <script src="bataille.js"></script>
   <script>
-    let url = "http://localhost:5001";
+    let url = "http://localhost:5000";
     let i = 0;
     let room = "";
     let nbJoueur = 1;
@@ -99,39 +99,42 @@
     });
 
     socket.on("cellClicked", (message, cell) => {
-      console.log(message, cell);
+    console.log(message, cell);
 
-      let cellElement = document.getElementById(cell);
+    // Assurez-vous que l'ID de la cellule est correct pour les deux joueurs
+    const cellElement = document.getElementById(cell) || document.getElementById("p" + (joueur === 1 ? 2 : 1) + "-" + cell.split('-')[1] + "-" + cell.split('-')[2]);
 
-      // Check if cellElement is not null
-      if (cellElement) {
-        // Check if cell has already been clicked
-        if (cellElement.style.pointerEvents === "none") {
-          return;
-        }
-      } else {
-        console.log(`No element found with id: ${cell}`);
+    // Vérifiez si l'élément cellElement n'est pas nul
+    if (cellElement) {
+      // Vérifiez si la cellule a déjà été cliquée
+      if (cellElement.style.pointerEvents === "none") {
+        return;
       }
+    } else {
+      console.log(`Aucun élément trouvé avec l'ID : ${cell}`);
+      return;
+    }
 
-      document.querySelector("#player-message").innerText = message;
-      if (message === "touché") {
-        cellElement.style.backgroundColor = "red";
-        nbCellClicked++;
-        if (nbCellClicked === 9) {
-          document.querySelector("#player-message").innerText =
-            "Bravo vous avez gagné !";
-          document.querySelector("#reload").style.visibility = "visible";
-        }
-      } else {
-        cellElement.style.backgroundColor = "blue";
+    document.querySelector("#player-message").innerText = message;
+    if (message === "touché") {
+      cellElement.style.backgroundColor = "red";
+      nbCellClicked++;
+      if (nbCellClicked === 9) {
+        document.querySelector("#player-message").innerText =
+          "Bravo vous avez gagné !";
+        document.querySelector("#reload").style.visibility = "visible";
       }
+    } else {
+      cellElement.style.backgroundColor = "blue";
+    }
 
-      // Disable further clicks on this cell
-      cellElement.style.pointerEvents = "none";
+    // Désactive les clics supplémentaires sur cette cellule
+    cellElement.style.pointerEvents = "none";
 
-      // Emit room update event to server
-      socket.emit("updateRoom", room);
-    });
+    // Émet l'événement de mise à jour de la salle au serveur
+    socket.emit("updateRoom", room);
+  });
+
 
     socket.on("myGrid", (grid) => {
       console.log("getMyGrid");
