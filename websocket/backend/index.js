@@ -3,7 +3,7 @@ const http = require("http");
 const socketIo = require("socket.io");
 const ip = require("ip");
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 const app = express();
 const server = http.createServer(app);
@@ -26,7 +26,7 @@ io.on("connection", (socket) => {
       rooms[room] = rooms[room].filter((id) => id !== socket.id);
       if (rooms[room].length === 0) delete rooms[room];
       io.to(room).emit("users", getUsersInRoom(room));
-      io.to(room).emit("roomUpdated", rooms[room]); // Emit roomUpdated event
+      io.to(room).emit("roomUpdated", rooms[room]);
     });
     delete users[socket.id];
   });
@@ -36,7 +36,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("join", (room) => {
-    console.log(`join room:  ${room}`);
+    console.log(`join room: ${room}`);
     if (rooms[room] && rooms[room].length >= 2) {
       socket.emit("error", "La salle est pleine");
       return;
@@ -45,11 +45,11 @@ io.on("connection", (socket) => {
     socket.emit("join", room);
     if (!rooms[room]) {
       rooms[room] = [];
-      games[room] = [];
+      games[room] = {};
     }
     rooms[room].push(socket.id);
-    io.to(room).emit("users", getUsersInRoom(room)); // Émet les utilisateurs de la room
-    io.to(room).emit("roomUpdated", rooms[room]); // Emit roomUpdated event
+    io.to(room).emit("users", getUsersInRoom(room));
+    io.to(room).emit("roomUpdated", rooms[room]);
 
     if (rooms[room][0] === socket.id) {
       socket.emit("quiEtesVous", "Vous êtes le joueur 1");
@@ -60,31 +60,31 @@ io.on("connection", (socket) => {
 
   socket.on("boatPlaced", (room, data) => {
     console.log("bateau placé");
-    games[room].push(data);
-    if (games[room].length === 2) {
+    games[room][data.player] = data.tab;
+    if (Object.keys(games[room]).length === 2) {
       io.to(room).emit("startGame", games[room]);
     }
   });
 
   socket.on("cellClicked", (room, data) => {
     const game = games[room];
-    const cell = data.cell.split("-");
-    const playerNumber = cell[0].substring(1); // Get the player number from the cell ID
-    const row = cell[1];
-    const col = cell[2];
-    const player = game.find((game) => game.player !== playerNumber);
-    if (player.tab[row][col] === 1) {
-      io.to(room).emit("cellClicked", "touché", data.cell); // Emit to all clients in the room
-    } else {
-      io.to(room).emit("cellClicked", "raté", data.cell); // Emit to all clients in the room
+    if (game) {
+      const opponent = data.player === 1 ? 2 : 1;
+      const player = game[opponent];
+      const cell = data.cell.split("-");
+      if (player && player[cell[1]][cell[2]] === 1) {
+        io.to(room).emit("cellClicked", "touché", data.cell);
+      } else {
+        io.to(room).emit("cellClicked", "raté", data.cell);
+      }
     }
   });
 
   socket.on("getMyGrid", (room, joueur) => {
     if (games[room]) {
-      const game = games[room].find((game) => game.player === joueur);
+      const game = games[room][joueur];
       if (game) {
-        socket.emit("myGrid", game.tab);
+        socket.emit("myGrid", game);
       }
     }
   });
@@ -100,15 +100,14 @@ io.on("connection", (socket) => {
       }
     }
     delete users[socket.id];
-    io.to(room).emit("users", getUsersInRoom(room)); // Émet les utilisateurs de la room
-    io.to(room).emit("roomUpdated", rooms[room]); // Emit roomUpdated event
+    io.to(room).emit("users", getUsersInRoom(room));
+    io.to(room).emit("roomUpdated", rooms[room]);
 
-    // Emit clearGrids event
     socket.emit("clearGrids");
   });
 
   socket.on("getUsers", (room) => {
-    socket.emit("users", { users: rooms[room] }); // Émet les utilisateurs de la room
+    socket.emit("users", { users: rooms[room] });
   });
 });
 

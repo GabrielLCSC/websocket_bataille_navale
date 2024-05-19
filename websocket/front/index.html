@@ -28,7 +28,7 @@
 
     <h1 id="player-message"></h1>
 
-    <div style="display: flex; justify-content:space-around;">
+    <div style="display: flex; justify-content: space-around">
       <h1>Joueur 1</h1>
       <h1>Joueur 2</h1>
     </div>
@@ -40,12 +40,14 @@
         <div class="grid" id="grid2"></div>
       </div>
     </div>
-    <div style="display: flex; justify-content: center;">
-      <button id="reload" style="width: fit-content; margin: auto; visibility: hidden;">Relancer une partie</button>
+    <div style="display: flex; justify-content: center">
+      <button
+        id="reload"
+        style="width: fit-content; margin: auto; visibility: hidden"
+      >
+        Relancer une partie
+      </button>
     </div>
-
-    
-    
   </body>
   <script
     src="https://cdn.socket.io/4.7.5/socket.io.min.js"
@@ -54,7 +56,7 @@
   ></script>
   <script src="bataille.js"></script>
   <script>
-    let url = 'http://localhost:5000';
+    let url = "http://localhost:5001";
     let i = 0;
     let room = "";
     let nbJoueur = 1;
@@ -84,84 +86,92 @@
       document.querySelector("#player-message").innerText = data;
       if (data === "Vous êtes le joueur 1") {
         joueur = 1;
-      }
-      else joueur = 2
+      } else joueur = 2;
       console.log("joueur : " + joueur);
       console.log("placage ds bat");
       generateBoats(joueur);
     });
 
-    socket.on('startGame', () => {
-      console.log('Game started');
-      document.querySelector("#player-message").innerText = 'Game started';
-      socket.emit('getMyGrid', room, joueur);
+    socket.on("startGame", () => {
+      console.log("Game started");
+      document.querySelector("#player-message").innerText = "Game started";
+      socket.emit("getMyGrid", room, joueur);
     });
 
     socket.on("cellClicked", (message, cell) => {
-  console.log(message, cell);
-  
-  let cellElement = document.getElementById(cell);
+      console.log(message, cell);
 
-// Check if cellElement is not null
-if (cellElement) {
-  // Check if cell has already been clicked
-  if (cellElement.style.pointerEvents === 'none') {
-    return;
-  }
-} else {
-  console.log(`No element found with id: ${cell}`);
-}
+      let cellElement = document.getElementById(cell);
 
-  document.querySelector("#player-message").innerText = message;
-  if(message === 'touché'){
-    cellElement.style.backgroundColor = 'red';
-    nbCellClicked++;
-    if(nbCellClicked === 9){
-      document.querySelector("#player-message").innerText = 'Bravo vous avez gagné !';
-      document.querySelector("#reload").style.visibility = 'visible';
-    }
-  }else{
-    cellElement.style.backgroundColor = 'blue';
-  }
-  
-  // Disable further clicks on this cell
-  cellElement.style.pointerEvents = 'none';
+      // Check if cellElement is not null
+      if (cellElement) {
+        // Check if cell has already been clicked
+        if (cellElement.style.pointerEvents === "none") {
+          return;
+        }
+      } else {
+        console.log(`No element found with id: ${cell}`);
+      }
 
-  // Emit room update event to server
-  socket.emit("updateRoom", room);
-});
+      document.querySelector("#player-message").innerText = message;
+      if (message === "touché") {
+        cellElement.style.backgroundColor = "red";
+        nbCellClicked++;
+        if (nbCellClicked === 9) {
+          document.querySelector("#player-message").innerText =
+            "Bravo vous avez gagné !";
+          document.querySelector("#reload").style.visibility = "visible";
+        }
+      } else {
+        cellElement.style.backgroundColor = "blue";
+      }
 
-socket.on('myGrid', (grid) => {
-  console.log('getMyGrid');
-  console.log(grid);
+      // Disable further clicks on this cell
+      cellElement.style.pointerEvents = "none";
 
-  if(joueur===1){
-    for(let i=0; i<10; i++){
-      for(let j=0; j<10; j++){
-        if(grid[i][j] === 1){
-          document.getElementById('grid1').innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: gray;"></div>`;  
-        }else{
-          document.getElementById('grid1').innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: white;"></div>`;
+      // Emit room update event to server
+      socket.emit("updateRoom", room);
+    });
+
+    socket.on("myGrid", (grid) => {
+      console.log("getMyGrid");
+      console.log(grid);
+
+      if (joueur === 1) {
+        for (let i = 0; i < 10; i++) {
+          for (let j = 0; j < 10; j++) {
+            if (grid[i][j] === 1) {
+              document.getElementById(
+                "grid1"
+              ).innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: gray;"></div>`;
+            } else {
+              document.getElementById(
+                "grid1"
+              ).innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: white;"></div>`;
+            }
+          }
+        }
+        generateGrid(2);
+      } else {
+        generateGrid(1);
+        for (let i = 0; i < 10; i++) {
+          for (let j = 0; j < 10; j++) {
+            if (grid[i][j] === 1) {
+              document.getElementById(
+                "grid2"
+              ).innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: gray;"></div>`;
+            } else {
+              document.getElementById(
+                "grid2"
+              ).innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: white;"></div>`;
+            }
+          }
         }
       }
-    }
-    generateGrid(2);
-  }else{
-    generateGrid(1);  
-    for(let i=0; i<10; i++){
-      for(let j=0; j<10; j++){
-        if(grid[i][j] === 1){
-          document.getElementById('grid2').innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: gray;"></div>`;  
-        }else{
-          document.getElementById('grid2').innerHTML += `<div class="cell" id="${i}-${j}" style="background-color: white;"></div>`;
-        }
-      }
-    }
-  }
-  // Emit room update event to server
-  socket.emit("updateRoom", room);
-});
-      
+      // Emit room update event to server
+      socket.emit("updateRoom", room);
+    });
+
     socket.on("error", (message) => {
       console.log(message);
       document.querySelector("#error-message").innerText = message;
@@ -171,9 +181,7 @@ socket.on('myGrid', (grid) => {
       console.log("Joined room: " + room);
       socket.on("users", (users) => {
         console.log(JSON.stringify(users));
-
-    });
-
+      });
     });
 
     socket.on("disconnect", () => {
@@ -187,9 +195,9 @@ socket.on('myGrid', (grid) => {
       nbJoueur = 2;
     });
 
-    socket.on("clearGrids",(grid) => {
-      document.getElementById('grid1').innerHTML = '';
-      document.getElementById('grid2').innerHTML = '';
+    socket.on("clearGrids", (grid) => {
+      document.getElementById("grid1").innerHTML = "";
+      document.getElementById("grid2").innerHTML = "";
     });
 
     // Écoute de l'événement 'generateBoats'
@@ -198,7 +206,6 @@ socket.on('myGrid', (grid) => {
     //   generateBoats(1);
     //   generateBoats(2);
     // });
-    
 
     let send = () => {
       i++;
@@ -209,17 +216,14 @@ socket.on('myGrid', (grid) => {
       socket.emit("leave", room);
       socket.emit("join", e.target.value);
       room = e.target.value;
-
-      
     });
 
     const getUsers = () => {
       socket.emit("getUsers", room);
     };
 
-    document.getElementById('reload').addEventListener('click', () => {
+    document.getElementById("reload").addEventListener("click", () => {
       socket.emit("gameWon", room); // Emit gameWon event to server
     });
-
   </script>
 </html>

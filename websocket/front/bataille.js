@@ -1,5 +1,5 @@
 let joueur = 1;
-let bateaux = { 1: 0, 2: 0, 3: 0 }; 
+let bateaux = { 1: 0, 2: 0, 3: 0 };
 const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
 const numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 
@@ -8,27 +8,26 @@ function generateGrid(player) {
 
   for (let i = 0; i < 10; i++) {
     for (let j = 0; j < 10; j++) {
-      grid.innerHTML += `<div class="cell" id="p${player}-${i}-${j}" style="background-color: white;" onclick="checkCell(this, ${player})"></div>`;
+      grid.innerHTML += `<div class="cell" id="p${player}-${i}-${j}" style="background-color: white;" onclick="checkCell(this)"></div>`;
     }
   }
 }
 
 function checkCell(cell) {
-  //on envoie les coordonnées de la cellule au serveur
+  // Envoie les coordonnées de la cellule au serveur
   console.log(cell.id);
   socket.emit("cellClicked", room, {
     player: joueur,
     cell: cell.id,
-    
   });
 }
 
 function generateBoats(player) {
   console.log("bateaux placés start");
-  const boatSizes = [2, 3, 4]; // Sizes of the boats
+  const boatSizes = [2, 3, 4]; // Taille des bateaux
   let arraywithboat = [];
 
-  // Create matrix 10x10
+  // Crée une matrice 10x10
   for (let i = 0; i < 10; i++) {
     arraywithboat[i] = [];
     for (let j = 0; j < 10; j++) {
@@ -36,10 +35,11 @@ function generateBoats(player) {
     }
   }
 
+  // Placement des bateaux dans la grille
   for (let size of boatSizes) {
     let placed = false;
     while (!placed) {
-      let direction = Math.floor(Math.random() * 2); // 0 for horizontal, 1 for vertical
+      let direction = Math.floor(Math.random() * 2); // 0 pour horizontal, 1 pour vertical
       let startRow, startCol;
 
       if (direction === 0) {
@@ -84,14 +84,10 @@ function generateBoats(player) {
     }
   }
 
+  // Envoi des données de placement des bateaux au serveur
   socket.emit("boatPlaced", room, {
     player: joueur,
     tab: arraywithboat,
   });
   console.log("bateaux placés");
 }
-
-// document.getElementById("sendButton").addEventListener("click", () => {
-//   //on renvoie les 2 grilles au serveur
-//   console.log("sendButton");
-// });
